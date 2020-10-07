@@ -1,0 +1,46 @@
+metadata:
+  name: RadarAPI
+projects:
+  - name: radar-numeriqc-api
+    source:
+      location: 'https://github.com/CQEN-QDCE/Radar-NumeriQc-API'
+      type: git
+      branch: main
+components:
+  - mountSources: true
+    endpoints:
+      - name: nodejs
+        port: 3000
+    memoryLimit: 1Gi
+    type: dockerimage
+    image: 'quay.io/eclipse/che-nodejs12-community:nightly'
+    alias: nodejs
+  - mountSources: true
+    endpoints:
+      - name: postgresql-database
+        port: 5432
+        attributes:
+          discoverable: 'true'
+          public: 'false'
+    memoryLimit: 256Mi
+    type: dockerimage
+    volumes:
+      - name: postgresql-storage
+        containerPath: /var/lib/pgsql/data
+    image: centos/postgresql-10-centos7
+    alias: postgresql
+    env:
+      - value: radar
+        name: POSTGRESQL_USER
+      - value: radar00
+        name: POSTGRESQL_PASSWORD
+      - value: radar
+        name: POSTGRESQL_DATABASE
+apiVersion: 1.0.0
+commands:
+  - name: npm install
+    actions:
+      - workdir: '${CHE_PROJECTS_ROOT}/Radar-NumeriQc-API'
+        type: exec
+        command: npm install
+        component: nodejs
