@@ -8,7 +8,6 @@ const pool = new Pool({
   port: "5432"
 });
 
-/*
 const query = `
 -- Table Enonces contient les enonces et leurs reponses --
 CREATE TABLE IF NOT EXISTS Enonces (
@@ -74,11 +73,9 @@ CREATE TABLE IF NOT EXISTS Lexique (
 -- Index sur Table Lexique sur le champ mot --
 CREATE INDEX LexiqueMot On Lexique(mot);
 `;
-*/
-const query = fs.readFileSync("./data.sql").toString();
 
+//const query = fs.readFileSync("./data.sql").toString();
 
- 
 pool.connect();
 module.exports = pool;
 
@@ -87,6 +84,6 @@ pool.query(query, (err, res) => {
         console.error(err.message);
         return;
     }
-    console.log('Table is successfully created');
+    console.log('Tables is successfully created');
     pool.end();
 });

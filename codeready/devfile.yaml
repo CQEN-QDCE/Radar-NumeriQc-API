@@ -5,7 +5,7 @@ projects:
     source:
       location: 'https://github.com/CQEN-QDCE/Radar-NumeriQc-API'
       type: git
-      branch: main
+      branch: nodejs-express-postgres
 components:
   - mountSources: true
     endpoints:
@@ -13,7 +13,11 @@ components:
         port: 3000
     memoryLimit: 1Gi
     type: dockerimage
-    image: 'quay.io/eclipse/che-nodejs12-community:nightly'
+    volumes:
+      - name: nodejs
+        containerPath: /home/user
+    image: >-
+      registry.redhat.io/codeready-workspaces/plugin-java8-rhel8@sha256:d04f70c8340abaee1a282b77158d054f4faf2225bc17c79aafb413396c367782
     alias: nodejs
   - mountSources: true
     endpoints:
@@ -40,7 +44,34 @@ apiVersion: 1.0.0
 commands:
   - name: npm install
     actions:
-      - workdir: '${CHE_PROJECTS_ROOT}/Radar-NumeriQc-API'
+      - workdir: '${CHE_PROJECTS_ROOT}/Radar-NumeriQc-API/nodejs-express-postgres'
         type: exec
         command: npm install
+        component: nodejs
+  - name: npm install express pg
+    actions:
+      - workdir: '${CHE_PROJECTS_ROOT}/Radar-NumeriQc-API/nodejs-express-postgres'
+        type: exec
+        command: npm i express pg
+        component: nodejs
+  - name: Run the web app
+    actions:
+      - workdir: '${CHE_PROJECTS_ROOT}/Radar-NumeriQc-API/nodejs-express-postgres'
+        type: exec
+        command: nodemon index.js
+        component: nodejs
+  - name: 4. Run the web app (debugging enabled)
+    actions:
+      - workdir: '${CHE_PROJECTS_ROOT}/Radar-NumeriQc-API/nodejs-express-postgres'
+        type: exec
+        command: nodemon --inspect index.js
+        component: nodejs
+  - name: 5. Stop the web app
+    actions:
+      - type: exec
+        command: >-
+          node_server_pids=$(pgrep -fx '.*nodemon (--inspect )?index.js' | tr
+          "\\n" " ") && echo "Stopping node server with PIDs:
+          ${node_server_pids}" &&  kill -15 ${node_server_pids} &>/dev/null &&
+          echo 'Done.'
         component: nodejs
