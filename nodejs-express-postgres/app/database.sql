@@ -61,3 +61,9 @@ CREATE TABLE IF NOT EXISTS Lexique (
 
 -- Index sur Table Lexique sur le champ mot --
 CREATE INDEX LexiqueMot On Lexique(mot);
+
+
+CREATE TABLE IF NOT EXISTS test (
+    id SERIAL NOT NULL,
+    nom VARCHAR(200) NOT NULL,
+);
