@@ -58,11 +58,11 @@ commands:
     actions:
       - workdir: '${CHE_PROJECTS_ROOT}/Radar-NumeriQc-API'
         type: exec
-        command: nodemon index.js
+        command: node app.js
         component: nodejs
   - name: 4. Run the web app (debugging enabled)
     actions:
       - workdir: '${CHE_PROJECTS_ROOT}/Radar-NumeriQc-API'
         type: exec
-        command: nodemon --inspect index.js
+        command: node --inspect app.js
         component: nodejs
