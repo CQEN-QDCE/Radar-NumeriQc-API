@@ -1,5 +1,14 @@
+const Pool = require("pg").Pool;
 
+const pool = new Pool({
+  user: "radar",
+  password: "radar00",
+  database: "radar",
+  host: "localhost",
+  port: "5432"
+});
 
+const query = `
 -- Table Enonces contient les enonces et leurs reponses --
 CREATE TABLE IF NOT EXISTS Enonces (
     id SERIAL NOT NULL,
@@ -35,11 +44,13 @@ CREATE INDEX SeancesIdOrganisation ON Seances(id_organisation);
 CREATE INDEX SeancesEstOfficiel ON Seances(est_officiel);
 
 -- Table Reponses contient les id des seances, les id des enonces et les reponses (entre 0 et 5) --
+CREATE TYPE type_reponse AS ENUM ('0', '1', '2', '3', '4', '5');
+
 CREATE TABLE IF NOT EXISTS Reponses (
     id SERIAL NOT NULL,
     id_seance INTEGER NOT NULL,
     id_enonce INTEGER NOT NULL,
-    reponse ENUM(0, 1, 2, 3, 4) NOT NULL,
+    reponse type_reponse NOT NULL,
     PRIMARY KEY (id),
     FOREIGN KEY (id_seance) REFERENCES Seances(id) ON DELETE CASCADE,
     FOREIGN KEY (id_enonce) REFERENCES Enonces(id) ON DELETE CASCADE,
@@ -62,8 +73,22 @@ CREATE TABLE IF NOT EXISTS Lexique (
 -- Index sur Table Lexique sur le champ mot --
 CREATE INDEX LexiqueMot On Lexique(mot);
 
-
 CREATE TABLE IF NOT EXISTS test (
     id SERIAL NOT NULL,
-    nom VARCHAR(200) NOT NULL,
+    nom VARCHAR(200) NOT NULL
 );
+`;
+
+//const query = fs.readFileSync("./data.sql").toString();
+
+pool.connect();
+module.exports = pool;
+
+pool.query(query, (err, res) => {
+    if (err) {
+        console.error(err.message);
+        return;
+    }
+    console.log('Tables is successfully created');
+    pool.end();
+});

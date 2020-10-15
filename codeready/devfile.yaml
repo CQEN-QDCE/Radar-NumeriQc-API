@@ -50,28 +50,19 @@ commands:
         component: nodejs
   - name: npm install express pg
     actions:
-      - workdir: '${CHE_PROJECTS_ROOT}/Radar-NumeriQc-API/nodejs-express-postgres'
+      - workdir: '${CHE_PROJECTS_ROOT}/Radar-NumeriQc-API'
         type: exec
         command: npm i express pg
         component: nodejs
   - name: Run the web app
     actions:
-      - workdir: '${CHE_PROJECTS_ROOT}/Radar-NumeriQc-API/nodejs-express-postgres'
+      - workdir: '${CHE_PROJECTS_ROOT}/Radar-NumeriQc-API'
         type: exec
         command: nodemon index.js
         component: nodejs
   - name: 4. Run the web app (debugging enabled)
     actions:
-      - workdir: '${CHE_PROJECTS_ROOT}/Radar-NumeriQc-API/nodejs-express-postgres'
+      - workdir: '${CHE_PROJECTS_ROOT}/Radar-NumeriQc-API'
         type: exec
         command: nodemon --inspect index.js
-        component: nodejs
-  - name: 5. Stop the web app
-    actions:
-      - type: exec
-        command: >-
-          node_server_pids=$(pgrep -fx '.*nodemon (--inspect )?index.js' | tr
-          "\\n" " ") && echo "Stopping node server with PIDs:
-          ${node_server_pids}" &&  kill -15 ${node_server_pids} &>/dev/null &&
-          echo 'Done.'
         component: nodejs
