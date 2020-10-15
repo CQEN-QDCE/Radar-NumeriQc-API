@@ -2,7 +2,7 @@ const express = require('express');
 const app = express();
 const pool = require("../db/db");
 
-
+// Créer POST pour insérer un nom
 app.post("/radar", async(req, res) => { 
   try{
   const {nom} = req.body;
@@ -16,6 +16,7 @@ app.post("/radar", async(req, res) => {
   }
 })
 
+// Créer GET pour renvoyer une liste de tous
 app.get("/radar", async(req, res) => { 
   try{
   const {nom} = req.body;

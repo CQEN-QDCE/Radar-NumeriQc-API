@@ -1,9 +1,15 @@
-var express = require('express');
-var router = express.Router();
+const express = require('express');
+const app = express();
+const pool = require("../db/db");
 
-/* GET home page. */
-router.get('/', function(req, res, next) {
-  res.render('index', { title: 'Express' });
-});
+// GET home page
 
-module.exports = router;
+app.get("/", async(req, res) => { 
+  try{
+   res.send("Welecome to Radar-NumeriQc-API application");
+  }catch (err){  
+   console.error(err.message);   
+  }
+})
+
+module.exports = app;
