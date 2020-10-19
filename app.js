@@ -4,7 +4,6 @@ const express = require("express");
 const app = express();
 const radarRouter = require('./routes/radar');
 const indexRouter = require('./routes/index');
-const testRouter = require('./routes/test');
 
 // Configurer le middleware pour prendre en charge l'analyse des données JSON dans l'objet de requête
 app.use(express.json());
