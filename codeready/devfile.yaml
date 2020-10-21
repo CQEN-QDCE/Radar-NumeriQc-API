@@ -44,3 +44,21 @@ commands:
         type: exec
         command: npm install
         component: nodejs
+  - name: npm install express pg
+    actions:
+      - workdir: '${CHE_PROJECTS_ROOT}/Radar-NumeriQc-API'
+        type: exec
+        command: npm i express pg
+        component: nodejs
+  - name: Run the web app
+    actions:
+      - workdir: '${CHE_PROJECTS_ROOT}/Radar-NumeriQc-API'
+        type: exec
+        command: node app.js
+        component: nodejs
+  - name: 4. Run the web app (debugging enabled)
+    actions:
+      - workdir: '${CHE_PROJECTS_ROOT}/Radar-NumeriQc-API'
+        type: exec
+        command: node --inspect app.js
+        component: nodejs
