@@ -5,7 +5,7 @@ projects:
     source:
       location: 'https://github.com/CQEN-QDCE/Radar-NumeriQc-API'
       type: git
-      branch: nodejs-express-postgres
+      branch: main
 components:
   - mountSources: true
     endpoints:
@@ -13,11 +13,7 @@ components:
         port: 3000
     memoryLimit: 1Gi
     type: dockerimage
-    volumes:
-      - name: nodejs
-        containerPath: /home/user
-    image: >-
-      registry.redhat.io/codeready-workspaces/plugin-java8-rhel8@sha256:d04f70c8340abaee1a282b77158d054f4faf2225bc17c79aafb413396c367782
+    image: 'quay.io/eclipse/che-nodejs12-community:nightly'
     alias: nodejs
   - mountSources: true
     endpoints:
@@ -44,7 +40,7 @@ apiVersion: 1.0.0
 commands:
   - name: npm install
     actions:
-      - workdir: '${CHE_PROJECTS_ROOT}/Radar-NumeriQc-API/nodejs-express-postgres'
+      - workdir: '${CHE_PROJECTS_ROOT}/Radar-NumeriQc-API'
         type: exec
         command: npm install
         component: nodejs
