@@ -1,4 +1,4 @@
-FROM ubi8/nodejs-12
+FROM registry.redhat.io/ubi8/nodejs-12
 
 # Add application sources
 ADD . /usr/radar-numeriqc-api
