@@ -6,10 +6,20 @@ const pool = require("../db/db");
 
 app.get("/", async(req, res) => { 
   try{
-   res.send("Welecome to Radar-NumeriQc-API application");
+   res.send("Welcome to Radar-NumeriQc-API application");
   }catch (err){  
    console.error(err.message);   
   }
-})
+});
+
+//Status page - Openshift probes
+app.get("/status", async(req, res) => { 
+  try{
+   res.statusCode = 200;
+   res.send();
+  }catch (err){  
+   console.error(err.message);   
+  }
+});
 
 module.exports = app;
