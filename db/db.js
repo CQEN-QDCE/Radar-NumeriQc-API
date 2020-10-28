@@ -1,11 +1,11 @@
 const Pool = require("pg").Pool;
 
 const pool = new Pool({
-  user: "radar",
-  password: "radar00",
-  database: "radar",
-  host: "localhost",
-  port: "5432"
+  user: process.env.POSTGRESQL_USER,
+  password: process.env.POSTGRESQL_PASSWORD,
+  database: process.env.POSTGRESQL_DATABASE,
+  host: process.env.POSTGRESQL_HOST,
+  port: process.env.POSTGRESQL_PORT
 });
 
 const query = `
@@ -81,12 +81,17 @@ CREATE TABLE IF NOT EXISTS Seances (
 );
 
 -- Indexs sur Table Seances sur les champs id_organisation et est_officiel pour accélérer les recherches sur ces champs --
-CREATE INDEX SeancesIdOrganisation ON Seances(id_organisation);
-CREATE INDEX SeancesEstOfficiel ON Seances(est_officiel);
+CREATE INDEX IF NOT EXISTS SeancesIdOrganisation ON Seances(id_organisation);
+CREATE INDEX IF NOT EXISTS SeancesEstOfficiel ON Seances(est_officiel);
 
 -- Table Reponses contient les id des seances, les id des enonces et les reponses (entre 0 et 5) --
 
+DO $$ BEGIN
 CREATE TYPE type_reponse AS ENUM ('0', '1', '2', '3', '4', '5');
+EXCEPTION
+    WHEN duplicate_object THEN null;
+END $$;
+
 CREATE TABLE IF NOT EXISTS Reponses (
     id SERIAL NOT NULL,
     id_seance INTEGER NOT NULL,
@@ -99,7 +104,7 @@ CREATE TABLE IF NOT EXISTS Reponses (
 );
 
 -- Index sur Table Reponses sur le champ id_seance pour rapidement filtrer les reponses par seance --
-CREATE INDEX ReponsesIdSeance On Reponses(id_seance);
+CREATE INDEX IF NOT EXISTS ReponsesIdSeance On Reponses(id_seance);
 
 -- Table Lexique contient les mots et leur definition --
 CREATE TABLE IF NOT EXISTS Lexique (
@@ -112,7 +117,7 @@ CREATE TABLE IF NOT EXISTS Lexique (
 );
 
 -- Index sur Table Lexique sur le champ mot --
-CREATE INDEX LexiqueMot On Lexique(mot);
+CREATE INDEX IF NOT EXISTS LexiqueMot On Lexique(mot);
 
 CREATE TABLE IF NOT EXISTS test (
     id SERIAL NOT NULL,
