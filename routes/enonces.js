@@ -1,8 +1,7 @@
 const express = require('express');
 const app = express();
 const pool = require("../db/db");
-const  enonceService =  require("../services");
-
+const enonceService =  require("../services");
 
 app.get('/enonces', (req, res) => {
   enonceService.getEnonce(req, res);
