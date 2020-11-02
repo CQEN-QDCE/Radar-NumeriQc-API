@@ -10,10 +10,10 @@ require('dotenv').config({ path: '.env' })
 app.use(express.json());
 
 //Routes
-const radarRouter = require('./routes/radar');
-app.use('/api/', radarRouter);
-
 const indexRouter = require('./routes/index');
-app.use(indexRouter);
+app.use('/api/', indexRouter);
+
+const homeRoute = require('./routes/home');
+app.use(homeRoute);
 
 module.exports = app;
