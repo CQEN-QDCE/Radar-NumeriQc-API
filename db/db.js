@@ -136,5 +136,4 @@ pool.query(query, (err, res) => {
         return;
     }
     console.log('Tables is successfully created');
-    pool.end();
 });
