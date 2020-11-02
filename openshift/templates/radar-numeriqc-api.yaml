@@ -1,0 +1,327 @@
+kind: Template
+apiVersion: template.openshift.io/v1
+metadata:
+  name: radar-numeriqc-api
+  annotations:
+    description: Radar Numeriqc API
+    tags: cqen,radar,numerique,numeriqc,api
+objects:
+#PostgreSQL
+- kind: Secret
+  apiVersion: v1
+  metadata:
+    name: postgresql
+    annotations:
+      template.openshift.io/expose-username: "{.data['database-user']}"
+      template.openshift.io/expose-password: "{.data['database-password']}"
+      template.openshift.io/expose-database_name: "{.data['database-name']}"
+  stringData:
+    database-user: "${POSTGRESQL_USER}"
+    database-password: "${POSTGRESQL_PASSWORD}"
+    database-name: "${POSTGRESQL_DATABASE}"
+- kind: Service
+  apiVersion: v1
+  metadata:
+    name: postgresql
+  spec:
+    ports:
+    - name: postgresql
+      protocol: TCP
+      port: 5432
+      targetPort: 5432
+      nodePort: 0
+    selector:
+      name: postgresql
+    type: ClusterIP
+    sessionAffinity: None
+  status:
+    loadBalancer: {}
+- kind: PersistentVolumeClaim
+  apiVersion: v1
+  metadata:
+    name: postgresql
+  spec:
+    accessModes:
+    - ReadWriteOnce
+    resources:
+      requests:
+        storage: 1Gi
+- kind: DeploymentConfig
+  apiVersion: apps.openshift.io/v1
+  metadata:
+    name: postgresql
+    annotations:
+      template.alpha.openshift.io/wait-for-ready: 'true'
+    labels:
+      app.kubernetes.io/part-of: radar-numeriqc-api
+  spec:
+    strategy:
+      type: Recreate
+    triggers:
+    - type: ImageChange
+      imageChangeParams:
+        automatic: true
+        containerNames:
+        - postgresql
+        from:
+          kind: ImageStreamTag
+          name: postgresql:10
+          namespace: openshift
+        lastTriggeredImage: ''
+    - type: ConfigChange
+    replicas: 1
+    selector:
+      name: postgresql
+    template:
+      metadata:
+        labels:
+          name: postgresql
+      spec:
+        containers:
+        - name: postgresql
+          image: " "
+          ports:
+          - containerPort: 5432
+            protocol: TCP
+          readinessProbe:
+            timeoutSeconds: 1
+            initialDelaySeconds: 5
+            exec:
+              command:
+              - "/usr/libexec/check-container"
+          livenessProbe:
+            timeoutSeconds: 10
+            initialDelaySeconds: 120
+            exec:
+              command:
+              - "/usr/libexec/check-container"
+              - "--live"
+          env:
+          - name: POSTGRESQL_USER
+            valueFrom:
+              secretKeyRef:
+                name: postgresql
+                key: database-user
+          - name: POSTGRESQL_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: postgresql
+                key: database-password
+          - name: POSTGRESQL_DATABASE
+            valueFrom:
+              secretKeyRef:
+                name: postgresql
+                key: database-name
+          resources:
+            limits:
+              memory: 512Mi
+          volumeMounts:
+          - name: postgresql-data
+            mountPath: "/var/lib/pgsql/data"
+          terminationMessagePath: "/dev/termination-log"
+          imagePullPolicy: IfNotPresent
+          capabilities: {}
+          securityContext:
+            capabilities: {}
+            privileged: false
+        volumes:
+        - name: postgresql-data
+          persistentVolumeClaim:
+            claimName: postgresql
+        restartPolicy: Always
+        dnsPolicy: ClusterFirst
+  status: {}
+#Radar Numeriqc API (NodeJS)
+- kind: Secret
+  apiVersion: v1
+  metadata:
+    name: radar-numeriqc-api-build
+  stringData:
+    WebHookSecretKey: "${GITHUB_WEBHOOK_SECRET}"
+- kind: ImageStream
+  apiVersion: v1
+  metadata:
+    name: radar-numeriqc-api
+- kind: BuildConfig 
+  apiVersion: v1
+  metadata:
+    annotations:
+      app.openshift.io/vcs-ref: main
+      app.openshift.io/vcs-uri: https://github.com/CQEN-QDCE/Radar-NumeriQc-API.git
+      template.alpha.openshift.io/wait-for-ready: "true"
+    labels:
+      app: radar-numeriqc-api
+    name: radar-numeriqc-api
+  spec:
+    output:
+      to:
+        kind: ImageStreamTag
+        name: radar-numeriqc-api:latest
+    source:
+      contextDir: /
+      git:
+        ref: main
+        uri: https://github.com/CQEN-QDCE/Radar-NumeriQc-API.git
+      type: Git
+    strategy:
+      dockerStrategy:
+        dockerfilePath: Dockerfile
+      type: Docker
+    triggers:
+    - github:
+        secretReference:
+          name: radar-numeriqc-api-build
+      type: GitHub
+    - type: ConfigChange
+- kind: Route 
+  apiVersion: v1
+  metadata:
+    annotations:
+      description: Route for Radar Numeriqc Api http service
+    labels:
+      app: radar-numeriqc-api
+    name: acces
+  spec:
+    port:
+      targetPort: radar-numeriqc-api-http
+    to:
+      kind: Service
+      name: radar-numeriqc-api
+- kind: Service 
+  apiVersion: v1
+  metadata:
+    labels:
+      app: radar-numeriqc-api
+      app.kubernetes.io/component: radar-numeriqc-api
+      app.kubernetes.io/instance: radar-numeriqc-api
+      app.kubernetes.io/part-of: radar-numeriqc-api
+    name: radar-numeriqc-api
+  spec:
+    ports:
+    - name: radar-numeriqc-api-http
+      port: 3000
+      protocol: TCP
+      targetPort: 3000
+    selector:
+      app: radar-numeriqc-api
+      deploymentconfig: radar-numeriqc-api
+    sessionAffinity: None
+    type: ClusterIP
+- kind: DeploymentConfig
+  apiVersion: apps.openshift.io/v1
+  metadata:
+    name: radar-numeriqc-api
+    annotations:
+      app.openshift.io/connects-to: postgresql
+    labels:
+      app: radar-numeriqc-api
+      app.kubernetes.io/component: radar-numeriqc-api
+      app.kubernetes.io/instance: radar-numeriqc-api
+      app.kubernetes.io/part-of: radar-numeriqc-api
+  spec:
+    strategy:
+      type: Recreate
+    triggers:
+    - type: ImageChange
+      imageChangeParams:
+        automatic: true
+        containerNames:
+        - radar-numeriqc-api
+        from:
+          kind: ImageStreamTag
+          name: radar-numeriqc-api:latest
+        lastTriggeredImage: ''
+    - type: ConfigChange
+    replicas: 1
+    selector:
+      name: radar-numeriqc-api
+    template:
+      metadata:
+        labels:
+          name: radar-numeriqc-api
+          app: radar-numeriqc-api
+          deploymentconfig: radar-numeriqc-api
+      spec:
+        containers:
+        - name: radar-numeriqc-api
+          image: " "
+          ports:
+          - containerPort: 3000
+            protocol: TCP
+          readinessProbe:
+            httpGet:
+              path: "/status"
+              port: 3000
+              scheme: "HTTP"
+            timeoutSeconds: 10
+            periodSeconds: 30
+            successThreshold: 1
+            failureThreshold: 3
+          livenessProbe:
+            httpGet:
+              path: "/status"
+              port: 3000
+              scheme: "HTTP"
+            timeoutSeconds: 10
+            periodSeconds: 30
+            successThreshold: 1
+            failureThreshold: 3
+          env:
+          - name: NODE_ENV
+            value: development
+          - name: SERVER_HOST
+            value: 0.0.0.0
+          - name: SERVER_PORT
+            value: "3000"
+          - name: POSTGRESQL_HOST
+            value: postgresql
+          - name: POSTGRESQL_PORT
+            value: "5432"
+          - name: POSTGRESQL_USER
+            valueFrom:
+              secretKeyRef:
+                key: database-user
+                name: postgresql
+          - name: POSTGRESQL_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                key: database-password
+                name: postgresql
+          - name: POSTGRESQL_DATABASE
+            valueFrom:
+              secretKeyRef:
+                key: database-name
+                name: postgresql
+          resources: {}
+          terminationMessagePath: "/dev/termination-log"
+          imagePullPolicy: Always
+          capabilities: {}
+          securityContext:
+            capabilities: {}
+            privileged: false
+        restartPolicy: Always
+        dnsPolicy: ClusterFirst
+  status: {}
+parameters:
+- name: POSTGRESQL_USER
+  displayName: PostgreSQL Connection Username
+  description: Username for PostgreSQL user that will be used for accessing the database.
+  generate: expression
+  from: user[A-Z0-9]{3}
+  required: true
+- name: POSTGRESQL_PASSWORD
+  displayName: PostgreSQL Connection Password
+  description: Password for the PostgreSQL connection user.
+  generate: expression
+  from: "[a-zA-Z0-9]{16}"
+  required: true
+- name: POSTGRESQL_DATABASE
+  displayName: PostgreSQL Database Name
+  description: Name of the PostgreSQL database accessed.
+  value: radar-numeriqc-api
+  required: true
+- name: GITHUB_WEBHOOK_SECRET
+  description: A secret string used to configure the GitHub webhook for the radar-api-qc app build
+  generate: expression 
+  from: "[a-zA-Z0-9]{40}"
+  required: true
