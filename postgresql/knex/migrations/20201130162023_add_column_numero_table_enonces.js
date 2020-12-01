@@ -6,6 +6,6 @@ exports.up = function(knex) {
 
 exports.down = function(knex) {
     return knex.schema.table('enonces', function(table) {
-        table.dropColumn('enonces')
+        table.dropColumn('numero')
     })
 };

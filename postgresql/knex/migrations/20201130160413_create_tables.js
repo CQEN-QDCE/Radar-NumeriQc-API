@@ -2,14 +2,14 @@
 exports.up = function(knex) {
     return knex.schema.createTable('axes', function(table) {
         table.uuid('id').notNullable().primary().defaultTo(knex.raw('uuid_generate_v4()'));
-        table.string('nom', 200).notNullable()
+        table.string('nom', 200).notNullable().unique()
         table.boolean('est_actif')
         })
         
         .createTable('pratiques', function(table) {
         table.uuid('id').notNullable().primary().defaultTo(knex.raw('uuid_generate_v4()'));
         table.uuid('id_axe').notNullable()
-        table.string('nom', 200).notNullable()
+        table.string('nom', 200).notNullable().unique()
         table.boolean('est_actif')
         table.foreign('id_axe').references('id').inTable('axes').onDelete('CASCADE')
         })
