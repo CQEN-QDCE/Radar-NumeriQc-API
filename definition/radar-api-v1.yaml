@@ -1,4 +1,4 @@
-openapi: 3.0.0
+openapi: 3.0.3
 info:
   title: Radar NumeriQC API
   description: Radar NumeriQC API.
@@ -56,7 +56,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
 servers:
-  - url: '/api'
+  - url: '/v1'
 components:
   schemas:
     Axe:

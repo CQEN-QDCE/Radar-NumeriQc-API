@@ -23,7 +23,7 @@ function loadDocumentSync(file) {
     return YAML.safeLoad(fs.readFileSync(file, 'utf8'));
 }
 
-const apiSpec = loadDocumentSync(path.join(__dirname, '/definition/radar-api.yaml')); //TODO .env
+const apiSpec = loadDocumentSync(path.join(__dirname, '/definition/radar-api-v1.yaml')); //TODO .env
 
 //Documentation OpenAPI (Swagger-ui) disponible sur /docs
 //TODO conditionner sur isProd?
