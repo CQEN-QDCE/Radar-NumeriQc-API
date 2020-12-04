@@ -1,0 +1,102 @@
+openapi: 3.0.0
+info:
+  title: Radar NumeriQC API
+  description: Radar NumeriQC API.
+  version: '0.1'
+paths:
+  /enonces:
+    get:
+      x-eov-operation-handler: routes/enoncesRoutes
+      operationId: enoncesGet
+      tags:
+        - /enonces
+      description: >-
+        Liste de tous les énoncés
+      responses:
+        '200':
+          description: Succès.
+          content:
+            application/json:
+              schema:
+                type: array
+                items: 
+                  $ref: '#/components/schemas/Enonce'
+        default:
+          description: Invalid request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /enonces/{id}:
+    get:
+      x-eov-operation-handler: routes/enoncesRoutes
+      operationId: enonceGetById
+      tags:
+        - /enonces
+      description: >-
+        Renvois un énoncé
+      parameters:
+        - name: id
+          in: path
+          description: Identifiant de l'énoncé
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Successful request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Enonce'
+        default:
+          description: Invalid request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+servers:
+  - url: '/api'
+components:
+  schemas:
+    Axe:
+      properties:
+        id:
+          type: integer
+        nom:
+          type: string
+    Pratique:
+      properties:
+        id:
+          type: integer
+        nom:
+          type: string
+        axe:
+          $ref: '#/components/schemas/Axe'
+    Enonce:
+      properties:
+        id:
+          type: integer
+        numero:
+          type: integer
+        texte:
+          type: string
+        reponses:
+          type: array
+          items: 
+            type: string
+          minItems: 5
+          maxItems: 5
+        pratique:
+          $ref: '#/components/schemas/Pratique'
+      required:
+        - numero
+        - texte
+        - reponses
+        - pratique
+    Error:
+      properties:
+        message:
+          type: string
+      required:
+        - message
