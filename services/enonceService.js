@@ -1,4 +1,4 @@
-const pool = require("../db/db");
+const db = require("../db/db");
 
 function mapEnonce(row)
 {
@@ -22,7 +22,7 @@ function mapEnonce(row)
  * Extraire tous les énoncés
  */
 async function getEnonces() { 
-    const enonces = await pool.query(
+    const enonces = await db.query(
       `SELECT e.id, e.numero, e.texte, e.reponse_0, e.reponse_1, e.reponse_2, e.reponse_3, e.reponse_4,
               p.id as id_pratique, p.nom as nom_pratique,
               a.id as id_axe, a.nom as nom_axe 
@@ -48,7 +48,7 @@ async function getEnonces() {
  * @param {integer} id 
  */
 async function getEnonceById(id) { 
-    const enonces = await pool.query(
+    const enonces = await db.query(
         `SELECT e.id, e.numero, e.texte, e.reponse_0, e.reponse_1, e.reponse_2, e.reponse_3, e.reponse_4,
                 p.id as id_pratique, p.nom as nom_pratique,
                 a.id as id_axe, a.nom as nom_axe 
@@ -70,26 +70,35 @@ async function getEnonceById(id) {
 
 // Créer POST pour insérer un nom
 async function postEnonce(req, res) { 
+    /*
     const { id_pratique, texte, reponse_0, reponse_1, reponse_2, reponse_3, reponse_4 } = req.body
-    const enonces = await pool.query( 'INSERT INTO enonces( id_pratique, texte, reponse_0, reponse_1, reponse_2, reponse_3, reponse_4, actif) VALUES ($1, $2, $3, $4, $5, $6, $7, true)',
+    const enonces = await db.query( 'INSERT INTO enonces( id_pratique, texte, reponse_0, reponse_1, reponse_2, reponse_3, reponse_4, actif) VALUES ($1, $2, $3, $4, $5, $6, $7, true)',
                     [id_pratique, texte, reponse_0, reponse_1, reponse_2,reponse_3,reponse_4]);
-    serviceEnonce(enonces, res, req);
+    */
+
+    return null;
 }
 
 // Créer put pour modifier la table d'enonce
 async function putEnonce(req, res) {
+    /*
     const { id_pratique, texte, reponse_0, reponse_1, reponse_2, reponse_3, reponse_4 } = req.body
-    const enonces = await pool.query( 'UPDATE enonces SET id_pratique = $2, texte = $3, reponse_0 = $4, reponse_1 = $5, reponse_2 = $6, reponse_3 = $7, reponse_4 = $8   WHERE id = $1',
-                            [req.params.id, id_pratique, texte, reponse_0, reponse_1, reponse_2, reponse_3, reponse_4]);   
-    serviceEnonce(enonces, res, req);
+    const enonces = await db.query( 'UPDATE enonces SET id_pratique = $2, texte = $3, reponse_0 = $4, reponse_1 = $5, reponse_2 = $6, reponse_3 = $7, reponse_4 = $8   WHERE id = $1',
+                            [req.params.id, id_pratique, texte, reponse_0, reponse_1, reponse_2, reponse_3, reponse_4]);
+    */
+
+    return null;
 }
 
 // Créer delete pour modifier actif pour qu'il soit false or true la table d'enonce
-async function desActiveEnonce(req, res) { 
+async function desActiveEnonce(req, res) {
+    /*
     const { id_pratique, texte, reponse_0, reponse_1, reponse_2, reponse_3, reponse_4 } = req.body
-    const enonces = await pool.query( 'UPDATE enonces SET id_pratique = $2, texte = $3, reponse_0 = $4, reponse_1 = $5, reponse_2 = $6, reponse_3 = $7, reponse_4 = $8, actif = $9  WHERE id = $1',
+    const enonces = await db.query( 'UPDATE enonces SET id_pratique = $2, texte = $3, reponse_0 = $4, reponse_1 = $5, reponse_2 = $6, reponse_3 = $7, reponse_4 = $8, actif = $9  WHERE id = $1',
                             [req.params.id, id_pratique, texte, reponse_0, reponse_1, reponse_2, reponse_3, reponse_4, req.params.actif]); 
-    serviceEnonce(enonces, res, req);
+    */
+
+    return null;
 }
 
 module.exports = { postEnonce, getEnonces, putEnonce, getEnonceById, desActiveEnonce };

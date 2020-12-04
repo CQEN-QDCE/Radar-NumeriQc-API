@@ -5,9 +5,13 @@ const swaggerUI = require('swagger-ui-express');
 const path = require('path');
 const fs = require("fs");
 const YAML = require("js-yaml");
+const logger = require('morgan');
 
 // Variables environnement
 require('dotenv').config({ path: '.env' })
+
+//Logger TODO regarder comment ça marche
+app.use(logger('dev'));
 
 // Prise en charge l'analyse des données JSON dans l'objet de requête
 app.use(express.json());
@@ -21,10 +25,11 @@ function loadDocumentSync(file) {
 
 const apiSpec = loadDocumentSync(path.join(__dirname, '/definition/radar-api.yaml')); //TODO .env
 
-//Documentation OpenAPI (Swagger-ui)
+//Documentation OpenAPI (Swagger-ui) disponible sur /docs
 //TODO conditionner sur isProd?
 app.use('/docs', swaggerUI.serve, swaggerUI.setup(apiSpec));
 
+//
 app.use(OpenApiValidator.middleware({
     apiSpec,
     validateRequests: true,

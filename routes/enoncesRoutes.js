@@ -13,5 +13,18 @@ module.exports = {
       res.status(200).send(enonce);
     else
       res.status(404).send();
-  }
+  },
+
+  enonceCreate: async (req, res) => {
+    res.status(404).send();
+  },
+
+  enonceUpdate: async (req, res) => {
+    res.status(404).send();
+  },
+
+  enonceDelete: async (req, res) => {
+    res.status(404).send();
+  },
+
 };
