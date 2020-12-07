@@ -3,12 +3,16 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "start": "node ./bin/www"
+    "start": "node ./bin/www",
+    "init:db": "bash postgresql/start_container.sh",
+    "make": "knex migrate:make $npm_config_filename --knexfile postgresql/knexfile.js",
+    "migrate": "knex migrate:latest --knexfile postgresql/knexfile.js",
+    "populate:db": "psql -U $npm_config_user -h $npm_config_host -d $npm_config_database -a -f postgresql/populate_tables.sql",
+    "rollback": "knex migrate:rollback --knexfile postgresql/knexfile.js"
   },
   "dependencies": {
     "cookie-parser": "~1.4.4",
     "debug": "~2.6.9",
-    "dotenv": "^8.2.0",
     "express": "~4.16.1",
     "http-errors": "~1.6.3",
     "knex": "^0.21.12",

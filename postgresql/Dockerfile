@@ -1,4 +1,4 @@
-FROM postgres:latest
+FROM postgres:13.1
 
 ARG POSTGRESQL_USER
 ARG POSTGRESQL_DATABASE
