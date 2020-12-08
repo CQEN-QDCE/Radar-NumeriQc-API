@@ -62,13 +62,15 @@ components:
     Axe:
       properties:
         id:
-          type: integer
+          type: string
+          format: uuid
         nom:
           type: string
     Pratique:
       properties:
         id:
-          type: integer
+          type: string
+          format: uuid
         nom:
           type: string
         axe:
@@ -76,7 +78,8 @@ components:
     Enonce:
       properties:
         id:
-          type: integer
+          type: string
+          format: uuid
         numero:
           type: integer
         texte:

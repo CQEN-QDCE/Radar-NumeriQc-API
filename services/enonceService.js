@@ -31,7 +31,8 @@ async function getEnonces() {
         ON p.id = e.id_pratique
        INNER JOIN Axes a
         ON a.id = p.id_axe
-       WHERE e.actif = true`);
+       WHERE e.est_actif = true
+       ORDER BY e.numero`);
 
     let listeEnonce = [];
     
@@ -57,7 +58,7 @@ async function getEnonceById(id) {
           ON p.id = e.id_pratique
          INNER JOIN Axes a
           ON a.id = p.id_axe
-         WHERE e.actif = true
+         WHERE e.est_actif = true
           AND e.id = $1`, [id]);
 
     if (enonces.rows.length)
