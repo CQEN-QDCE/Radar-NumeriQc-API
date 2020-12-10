@@ -29,7 +29,7 @@ const apiSpec = loadDocumentSync(path.join(__dirname, '/definition/radar-api-v1.
 //TODO conditionner sur isProd?
 app.use('/docs', swaggerUI.serve, swaggerUI.setup(apiSpec));
 
-//
+//OpenApiValidator - Generation des routes + validation des requêtes et réponses
 app.use(OpenApiValidator.middleware({
     apiSpec,
     validateRequests: true,
@@ -38,6 +38,16 @@ app.use(OpenApiValidator.middleware({
     operationHandlers: path.join(__dirname), //Routes gérée depuis la propriété 'x-eov-operation-handler' de la spec
   })
 );
+
+//Status page - Openshift probes
+app.get("/status", async(req, res) => { 
+  try{
+   res.statusCode = 200;
+   res.send();
+  }catch (err){  
+   console.error(err.message);   
+  }
+});
 
 //Gestion des erreurs
 app.use((err, req, res, next) => {
