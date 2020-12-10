@@ -17,7 +17,7 @@ then
         docker start radar_api_database
     else
         docker build --tag radar_api_database "${SCRIPT_DIR}/."
-        docker run --name radar_api_database -e POSTGRES_USER=$POSTGRESQL_USER -e POSTGRES_PASSWORD=$POSTGRESQL_PASSWORD -e POSTGRES_DATABASE=$POSTGRESQL_DATABASE -d -p 5432:5432 radar_api_database
+        docker run --name radar_api_database -e POSTGRESQL_USER=$POSTGRESQL_USER -e POSTGRESQL_PASSWORD=$POSTGRESQL_PASSWORD -e POSTGRESQL_DATABASE=$POSTGRESQL_DATABASE -d -p 5432:5432 radar_api_database
     fi
 else
     docker stop radar_api_database
