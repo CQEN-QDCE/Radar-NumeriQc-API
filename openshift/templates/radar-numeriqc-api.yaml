@@ -6,11 +6,17 @@ metadata:
     description: Radar Numeriqc API
     tags: cqen,radar,numerique,numeriqc,api
 objects:
+- kind: Secret
+  apiVersion: v1
+  metadata:
+    name: radar-numeriqc-api-build
+  stringData:
+    WebHookSecretKey: "${GITHUB_WEBHOOK_SECRET}"
 #PostgreSQL
 - kind: Secret
   apiVersion: v1
   metadata:
-    name: postgresql
+    name: rna-postgresql
     annotations:
       template.openshift.io/expose-username: "{.data['database-user']}"
       template.openshift.io/expose-password: "{.data['database-password']}"
@@ -19,19 +25,54 @@ objects:
     database-user: "${POSTGRESQL_USER}"
     database-password: "${POSTGRESQL_PASSWORD}"
     database-name: "${POSTGRESQL_DATABASE}"
+- kind: ImageStream
+  apiVersion: v1
+  metadata:
+    name: rna-postgresql
+- kind: BuildConfig 
+  apiVersion: v1
+  metadata:
+    annotations:
+      app.openshift.io/vcs-ref: main
+      app.openshift.io/vcs-uri: https://github.com/CQEN-QDCE/Radar-NumeriQc-API.git
+      template.alpha.openshift.io/wait-for-ready: "true"
+    labels:
+      app: radar-numeriqc-api
+    name: rna-postgresql
+  spec:
+    output:
+      to:
+        kind: ImageStreamTag
+        name: rna-postgresql:latest
+    source:
+      contextDir: /postgresql
+      git:
+        ref: main
+        uri: https://github.com/CQEN-QDCE/Radar-NumeriQc-API.git
+      type: Git
+    strategy:
+      dockerStrategy:
+        dockerfilePath: Dockerfile
+      type: Docker
+    triggers:
+    - github:
+        secretReference:
+          name: radar-numeriqc-api-build
+      type: GitHub
+    - type: ConfigChange
 - kind: Service
   apiVersion: v1
   metadata:
-    name: postgresql
+    name: rna-postgresql
   spec:
     ports:
-    - name: postgresql
+    - name: rna-postgresql
       protocol: TCP
       port: 5432
       targetPort: 5432
       nodePort: 0
     selector:
-      name: postgresql
+      name: rna-postgresql
     type: ClusterIP
     sessionAffinity: None
   status:
@@ -39,7 +80,7 @@ objects:
 - kind: PersistentVolumeClaim
   apiVersion: v1
   metadata:
-    name: postgresql
+    name: rna-postgresql
   spec:
     accessModes:
     - ReadWriteOnce
@@ -49,7 +90,7 @@ objects:
 - kind: DeploymentConfig
   apiVersion: apps.openshift.io/v1
   metadata:
-    name: postgresql
+    name: rna-postgresql
     annotations:
       template.alpha.openshift.io/wait-for-ready: 'true'
     labels:
@@ -62,23 +103,22 @@ objects:
       imageChangeParams:
         automatic: true
         containerNames:
-        - postgresql
+        - rna-postgresql
         from:
           kind: ImageStreamTag
-          name: postgresql:10
-          namespace: openshift
+          name: rna-postgresql:latest
         lastTriggeredImage: ''
     - type: ConfigChange
     replicas: 1
     selector:
-      name: postgresql
+      name: rna-postgresql
     template:
       metadata:
         labels:
-          name: postgresql
+          name: rna-postgresql
       spec:
         containers:
-        - name: postgresql
+        - name: rna-postgresql
           image: " "
           ports:
           - containerPort: 5432
@@ -100,23 +140,23 @@ objects:
           - name: POSTGRESQL_USER
             valueFrom:
               secretKeyRef:
-                name: postgresql
+                name: rna-postgresql
                 key: database-user
           - name: POSTGRESQL_PASSWORD
             valueFrom:
               secretKeyRef:
-                name: postgresql
+                name: rna-postgresql
                 key: database-password
           - name: POSTGRESQL_DATABASE
             valueFrom:
               secretKeyRef:
-                name: postgresql
+                name: rna-postgresql
                 key: database-name
           resources:
             limits:
               memory: 512Mi
           volumeMounts:
-          - name: postgresql-data
+          - name: rna-postgresql-data
             mountPath: "/var/lib/pgsql/data"
           terminationMessagePath: "/dev/termination-log"
           imagePullPolicy: IfNotPresent
@@ -125,19 +165,13 @@ objects:
             capabilities: {}
             privileged: false
         volumes:
-        - name: postgresql-data
+        - name: rna-postgresql-data
           persistentVolumeClaim:
-            claimName: postgresql
+            claimName: rna-postgresql
         restartPolicy: Always
         dnsPolicy: ClusterFirst
   status: {}
 #Radar Numeriqc API (NodeJS)
-- kind: Secret
-  apiVersion: v1
-  metadata:
-    name: radar-numeriqc-api-build
-  stringData:
-    WebHookSecretKey: "${GITHUB_WEBHOOK_SECRET}"
 - kind: ImageStream
   apiVersion: v1
   metadata:
@@ -212,7 +246,7 @@ objects:
   metadata:
     name: radar-numeriqc-api
     annotations:
-      app.openshift.io/connects-to: postgresql
+      app.openshift.io/connects-to: rna-postgresql
     labels:
       app: radar-numeriqc-api
       app.kubernetes.io/component: radar-numeriqc-api
@@ -221,6 +255,12 @@ objects:
   spec:
     strategy:
       type: Recreate
+      recreateParams:
+        post:
+          failurePolicy: Abort
+          execNewPod:
+            containerName: radar-numeriqc-api 
+            command: [ "npm", "run", "migrate" ]
     triggers:
     - type: ImageChange
       imageChangeParams:
@@ -274,24 +314,24 @@ objects:
           - name: SERVER_PORT
             value: "3000"
           - name: POSTGRESQL_HOST
-            value: postgresql
+            value: rna-postgresql
           - name: POSTGRESQL_PORT
             value: "5432"
           - name: POSTGRESQL_USER
             valueFrom:
               secretKeyRef:
                 key: database-user
-                name: postgresql
+                name: rna-postgresql
           - name: POSTGRESQL_PASSWORD
             valueFrom:
               secretKeyRef:
                 key: database-password
-                name: postgresql
+                name: rna-postgresql
           - name: POSTGRESQL_DATABASE
             valueFrom:
               secretKeyRef:
                 key: database-name
-                name: postgresql
+                name: rna-postgresql
           resources: {}
           terminationMessagePath: "/dev/termination-log"
           imagePullPolicy: Always

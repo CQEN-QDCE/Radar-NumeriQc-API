@@ -28,8 +28,6 @@ var server = http.createServer(app);
 server.listen(port);
 server.on('error', onError);
 server.on('listening', onListening);
-server.on('request', onRequest);
-
 
 /**
  * Normalize a port into a number, string, or false.
@@ -91,10 +89,4 @@ function onListening() {
   
   //debug('Listening on ' + bind);
   console.log('Listening on ' + bind) //TODO Convertir en debug?
-}
-
-
-function onRequest(request, response) {
-  //TODO Convertir en debug?
-  console.log(Date.now() + ' : ' + request.method + ' ' +request.url);
 }
